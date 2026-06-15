@@ -1,80 +1,108 @@
+const playScreen = document.getElementById("playScreen");
+const modeScreen = document.getElementById("modeScreen");
+const gameScreen = document.getElementById("gameScreen");
+
+const playBtn = document.getElementById("playBtn");
+const difficultyBtns = document.querySelectorAll(".difficulty");
+
 const button = document.getElementById("btn");
 const scoreText = document.getElementById("score");
 
 let score = 0;
+let gameStarted = false;
 
-// Button position
-let x = window.innerWidth / 2 - 70;
+let speed = 0.04;
+
+let x = window.innerWidth / 2 - 75;
 let y = window.innerHeight / 2 - 30;
 
-// Mouse position
 let mouseX = window.innerWidth / 2;
 let mouseY = window.innerHeight / 2;
 
-// Speed increases every click
-let speed = 0.12;
+// Play button
+playBtn.addEventListener("click", () => {
+    playScreen.classList.add("hidden");
+    modeScreen.classList.remove("hidden");
+});
 
-// Place button initially
-button.style.left = x + "px";
-button.style.top = y + "px";
+// Difficulty selection
+difficultyBtns.forEach(btn => {
+    btn.addEventListener("click", () => {
+        speed = parseFloat(btn.dataset.speed);
 
-// Track mouse
+        modeScreen.classList.add("hidden");
+        gameScreen.classList.remove("hidden");
+
+        startGame();
+    });
+});
+
+function startGame() {
+    gameStarted = true;
+
+    x = window.innerWidth / 2 - 75;
+    y = window.innerHeight / 2 - 30;
+
+    button.style.left = x + "px";
+    button.style.top = y + "px";
+}
+
 document.addEventListener("mousemove", (e) => {
     mouseX = e.clientX;
     mouseY = e.clientY;
 });
 
-// Increase score and speed
 button.addEventListener("click", () => {
     score++;
     scoreText.textContent = `Score: ${score}`;
 
-    // Make button faster
-    speed += 0.02;
+    // Gets faster every click
+    speed += 0.015;
 
-    // Small random dodge
-    x += (Math.random() - 0.5) * 80;
-    y += (Math.random() - 0.5) * 80;
+    // Small dodge
+    x += (Math.random() - 0.5) * 100;
+    y += (Math.random() - 0.5) * 100;
 });
 
 function animate() {
-    const btnCenterX = x + button.offsetWidth / 2;
-    const btnCenterY = y + button.offsetHeight / 2;
+    if (gameStarted) {
 
-    const dx = btnCenterX - mouseX;
-    const dy = btnCenterY - mouseY;
+        const centerX = x + button.offsetWidth / 2;
+        const centerY = y + button.offsetHeight / 2;
 
-    const distance = Math.sqrt(dx * dx + dy * dy);
+        const dx = centerX - mouseX;
+        const dy = centerY - mouseY;
 
-    const dangerRadius = 250;
+        const distance = Math.sqrt(dx * dx + dy * dy);
 
-    if (distance < dangerRadius) {
-        const strength = (dangerRadius - distance) / dangerRadius;
+        const dangerRadius = 250;
 
-        const nx = dx / (distance || 1);
-        const ny = dy / (distance || 1);
+        if (distance < dangerRadius) {
 
-        x += nx * strength * speed * 40;
-        y += ny * strength * speed * 40;
+            const strength =
+                (dangerRadius - distance) / dangerRadius;
+
+            const nx = dx / (distance || 1);
+            const ny = dy / (distance || 1);
+
+            x += nx * strength * speed * 40;
+            y += ny * strength * speed * 40;
+        }
+
+        const maxX =
+            window.innerWidth - button.offsetWidth;
+
+        const maxY =
+            window.innerHeight - button.offsetHeight;
+
+        x = Math.max(0, Math.min(maxX, x));
+        y = Math.max(0, Math.min(maxY, y));
+
+        button.style.left = x + "px";
+        button.style.top = y + "px";
     }
-
-    // Keep button on screen
-    const maxX = window.innerWidth - button.offsetWidth;
-    const maxY = window.innerHeight - button.offsetHeight;
-
-    x = Math.max(0, Math.min(maxX, x));
-    y = Math.max(0, Math.min(maxY, y));
-
-    button.style.left = x + "px";
-    button.style.top = y + "px";
 
     requestAnimationFrame(animate);
 }
 
 animate();
-
-// Handle resize
-window.addEventListener("resize", () => {
-    x = Math.min(x, window.innerWidth - button.offsetWidth);
-    y = Math.min(y, window.innerHeight - button.offsetHeight);
-});
