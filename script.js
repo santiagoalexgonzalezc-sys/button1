@@ -12,6 +12,7 @@ let score = 0;
 let gameStarted = false;
 
 let speed = 0.04;
+let impossibleMode = false;
 
 let x = window.innerWidth / 2 - 75;
 let y = window.innerHeight / 2 - 30;
@@ -19,16 +20,18 @@ let y = window.innerHeight / 2 - 30;
 let mouseX = window.innerWidth / 2;
 let mouseY = window.innerHeight / 2;
 
-// Play button
 playBtn.addEventListener("click", () => {
     playScreen.classList.add("hidden");
     modeScreen.classList.remove("hidden");
 });
 
-// Difficulty selection
 difficultyBtns.forEach(btn => {
     btn.addEventListener("click", () => {
+
         speed = parseFloat(btn.dataset.speed);
+
+        impossibleMode =
+            btn.textContent.trim() === "Impossible";
 
         modeScreen.classList.add("hidden");
         gameScreen.classList.remove("hidden");
@@ -39,6 +42,9 @@ difficultyBtns.forEach(btn => {
 
 function startGame() {
     gameStarted = true;
+
+    score = 0;
+    scoreText.textContent = "Score: 0";
 
     x = window.innerWidth / 2 - 75;
     y = window.innerHeight / 2 - 30;
@@ -56,15 +62,14 @@ button.addEventListener("click", () => {
     score++;
     scoreText.textContent = `Score: ${score}`;
 
-    // Gets faster every click
     speed += 0.015;
 
-    // Small dodge
     x += (Math.random() - 0.5) * 100;
     y += (Math.random() - 0.5) * 100;
 });
 
 function animate() {
+
     if (gameStarted) {
 
         const centerX = x + button.offsetWidth / 2;
@@ -89,11 +94,60 @@ function animate() {
             y += ny * strength * speed * 40;
         }
 
-        const maxX =
-            window.innerWidth - button.offsetWidth;
+        // IMPOSSIBLE MODE BORDER ESCAPE
+        if (impossibleMode) {
 
-        const maxY =
-            window.innerHeight - button.offsetHeight;
+            const borderDistance = 150;
+            const pushStrength = 15;
+
+            if (x < borderDistance) {
+                x += ((borderDistance - x) / borderDistance) * pushStrength;
+            }
+
+            if (x > window.innerWidth - button.offsetWidth - borderDistance) {
+                x -= (
+                    (
+                        x -
+                        (window.innerWidth - button.offsetWidth - borderDistance)
+                    ) / borderDistance
+                ) * pushStrength;
+            }
+
+            if (y < borderDistance) {
+                y += ((borderDistance - y) / borderDistance) * pushStrength;
+            }
+
+            if (y > window.innerHeight - button.offsetHeight - borderDistance) {
+                y -= (
+                    (
+                        y -
+                        (window.innerHeight - button.offsetHeight - borderDistance)
+                    ) / borderDistance
+                ) * pushStrength;
+            }
+
+            // EXTRA CORNER ESCAPE
+            const nearLeft = x < 100;
+            const nearRight =
+                x > window.innerWidth - button.offsetWidth - 100;
+
+            const nearTop = y < 100;
+            const nearBottom =
+                y > window.innerHeight - button.offsetHeight - 100;
+
+            if (
+                (nearLeft && nearTop) ||
+                (nearLeft && nearBottom) ||
+                (nearRight && nearTop) ||
+                (nearRight && nearBottom)
+            ) {
+                x += (window.innerWidth / 2 - x) * 0.05;
+                y += (window.innerHeight / 2 - y) * 0.05;
+            }
+        }
+
+        const maxX = window.innerWidth - button.offsetWidth;
+        const maxY = window.innerHeight - button.offsetHeight;
 
         x = Math.max(0, Math.min(maxX, x));
         y = Math.max(0, Math.min(maxY, y));
@@ -106,3 +160,8 @@ function animate() {
 }
 
 animate();
+
+window.addEventListener("resize", () => {
+    x = Math.min(x, window.innerWidth - button.offsetWidth);
+    y = Math.min(y, window.innerHeight - button.offsetHeight);
+});
