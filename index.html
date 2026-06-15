@@ -8,10 +8,32 @@
 </head>
 <body>
 
-    <div id="score">Score: 0</div>
+    <!-- PLAY SCREEN -->
+    <div id="playScreen" class="screen">
+        <h1>Catch The Button</h1>
+        <button id="playBtn" class="menu-btn">Play</button>
+    </div>
 
-    <button id="btn">Catch Me!</button>
+    <!-- MODE SCREEN -->
+    <div id="modeScreen" class="screen hidden">
+        <h1>Select Difficulty</h1>
+
+        <div class="mode-buttons">
+            <button class="difficulty" data-speed="0.04">Easy</button>
+            <button class="difficulty" data-speed="0.08">Normal</button>
+            <button class="difficulty" data-speed="0.12">Medium</button>
+            <button class="difficulty" data-speed="0.18">Hard</button>
+            <button class="difficulty" data-speed="0.28">Impossible</button>
+        </div>
+    </div>
+
+    <!-- GAME SCREEN -->
+    <div id="gameScreen" class="hidden">
+        <div id="score">Score: 0</div>
+        <button id="btn">Catch Me!</button>
+    </div>
 
     <script src="script.js"></script>
+
 </body>
 </html>
